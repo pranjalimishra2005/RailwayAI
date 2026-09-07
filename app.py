@@ -85,6 +85,12 @@ st.markdown("""
 # ════════════════════════════════════════════════════════════
 # SESSION STATE INITIALIZATION
 # ════════════════════════════════════════════════════════════
+_BASE = os.path.dirname(os.path.abspath(__file__))
+DEMO_CLIPS = [
+    os.path.join(_BASE, "test_videos", "demo1.mp4"),
+    os.path.join(_BASE, "test_videos", "demo4.mp4"),
+]
+
 def init_session_state():
     defaults = {
         "running": False,
@@ -96,12 +102,21 @@ def init_session_state():
         "confidence_values": [],
         "frame_count": 0,
         "total_hazards": 0,
+        "demo_clip_idx": 0,
+        "active_video_source": DEMO_CLIPS[0],
     }
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
 
 init_session_state()
+
+# Auto-start on first load
+if st.session_state.engine is None:
+    st.session_state.running = True
+    st.session_state.engine = DetectionEngine(confidence_threshold=0.35)
+    st.session_state.graphics = GraphicsEngine()
+    st.session_state.multimedia = MultimediaManager(output_dir="recordings")
 
 
 # ════════════════════════════════════════════════════════════
@@ -184,42 +199,6 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
-
-_base = os.path.dirname(os.path.abspath(__file__))
-
-col_d1, col_d2 = st.columns(2)
-
-with col_d1:
-    if st.button("🚀 LIVE DEMO — Clip 1", use_container_width=True, type="primary"):
-        _demo_path = os.path.join(_base, "test_videos", "demo1.mp4")
-        if not os.path.exists(_demo_path):
-            st.error(f"Demo video not found at: {_demo_path}")
-        else:
-            st.session_state.running = True
-            st.session_state.active_video_source = _demo_path
-            st.session_state.engine = DetectionEngine(confidence_threshold=conf_thresh)
-            st.session_state.graphics = GraphicsEngine()
-            st.session_state.multimedia = MultimediaManager(output_dir="recordings")
-            st.session_state.event_log = []
-            st.session_state.frame_count = 0
-            st.session_state.total_hazards = 0
-            st.toast("🚀 Demo Clip 1 Initialized!", icon="✅")
-
-with col_d2:
-    if st.button("🚀 LIVE DEMO — Clip 2", use_container_width=True, type="primary"):
-        _demo_path = os.path.join(_base, "test_videos", "demo4.mp4")
-        if not os.path.exists(_demo_path):
-            st.error(f"Demo video not found at: {_demo_path}")
-        else:
-            st.session_state.running = True
-            st.session_state.active_video_source = _demo_path
-            st.session_state.engine = DetectionEngine(confidence_threshold=conf_thresh)
-            st.session_state.graphics = GraphicsEngine()
-            st.session_state.multimedia = MultimediaManager(output_dir="recordings")
-            st.session_state.event_log = []
-            st.session_state.frame_count = 0
-            st.session_state.total_hazards = 0
-            st.toast("🚀 Demo Clip 2 Initialized!", icon="✅")
 
 # Dynamic Alert Banner Container
 alert_container = st.empty()
@@ -306,11 +285,15 @@ if st.session_state.running and st.session_state.engine is not None:
         while st.session_state.running:
             ret, frame = cap.read()
             if not ret:
-                if source_type == "Video File":
-                    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                    continue
-                else:
+                # Advance to next demo clip and loop
+                cap.release()
+                st.session_state.demo_clip_idx = (st.session_state.demo_clip_idx + 1) % len(DEMO_CLIPS)
+                next_clip = DEMO_CLIPS[st.session_state.demo_clip_idx]
+                st.session_state.active_video_source = next_clip
+                cap = cv2.VideoCapture(next_clip)
+                if not cap.isOpened():
                     break
+                continue
 
             st.session_state.frame_count += 1
             h, w = frame.shape[:2]
