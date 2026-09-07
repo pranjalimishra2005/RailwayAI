@@ -322,7 +322,11 @@ if st.session_state.running and st.session_state.engine is not None:
             prev_time = current_time
             st.session_state.fps_history.append(fps)
 
-            detections = engine.detect_and_track(frame, track_polygon, fps)
+            # Run YOLO only every 3rd frame for speed — reuse last detections otherwise
+            YOLO_SKIP = 3
+            if st.session_state.frame_count % YOLO_SKIP == 1:
+                st.session_state._last_detections = engine.detect_and_track(frame, track_polygon, fps)
+            detections = st.session_state.get("_last_detections", [])
             hazards = [d for d in detections if d.is_critical or d.zone == "HAZARD"]
 
             # ── 3. Render Graphics Overlays ──────────────────────────

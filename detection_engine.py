@@ -153,13 +153,13 @@ class DetectionEngine:
     def detect_and_track(self, frame: np.ndarray, track_polygon: np.ndarray = None, fps: float = 30.0) -> list[Detection]:
         t0 = time.time()
         
-        # Use YOLOv8 native ByteTrack with 640px optimized inference resolution
+        # Use YOLOv8 native ByteTrack with 320px optimized inference resolution (fast CPU mode)
         results = self.model.track(
             frame, 
             conf=self.confidence_threshold, 
             persist=True, 
             tracker="bytetrack.yaml", 
-            imgsz=640,
+            imgsz=320,
             verbose=False
         )
         
