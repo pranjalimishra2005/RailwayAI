@@ -94,7 +94,6 @@ class Detection:
         # Physics & Homography attributes
         self.ground_pos_m = (0.0, 0.0)    # Ground coordinates in meters (X, Y)
         self.distance_m = 0.0              # Real-world distance in meters
-        self.distance_est = 0.0            # Legacy alias
         self.speed_kmh = 0.0              # Speed in km/h
         self.predicted_future_pt = self.center
         self.ttc_sec = float('inf')       # Time-to-Collision in seconds
@@ -195,7 +194,6 @@ class DetectionEngine:
                     gx, gy = self.screen_to_ground(det.anchor[0], det.anchor[1])
                     det.ground_pos_m = (gx, gy)
                     det.distance_m = float(np.sqrt(gx**2 + gy**2))
-                    det.distance_est = det.distance_m
 
                     if track_id != -1 and track_id in self.prev_positions_m:
                         prev_x, prev_y, prev_t = self.prev_positions_m[track_id]
