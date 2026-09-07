@@ -7,7 +7,7 @@ const nextConfig = {
         source: '/api/:path*',
         destination: process.env.NEXT_PUBLIC_API_URL 
           ? `${process.env.NEXT_PUBLIC_API_URL}/api/:path*` 
-          : 'https://railai-backend.onrender.com/api/:path*',
+          : 'https://railai-backend-gtyw.onrender.com/api/:path*',
       },
     ]
   },
