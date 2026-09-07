@@ -81,6 +81,11 @@ export const api = {
    * Upload video and start analysis job
    */
   async uploadVideo(file: File, params?: Partial<CalibrationParams>): Promise<{ job_id: string }> {
+    const MAX_SIZE_MB = 50;
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      throw new Error(`File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Please upload a video under ${MAX_SIZE_MB}MB. Tip: trim your video to under 2 minutes.`);
+    }
+
     const formData = new FormData();
     formData.append('file', file);
     

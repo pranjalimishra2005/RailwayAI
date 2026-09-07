@@ -274,6 +274,9 @@ async def analyze_video(
     if not file.filename.lower().endswith((".mp4", ".avi", ".mov", ".mkv")):
         raise HTTPException(status_code=400, detail="Unsupported video format. Please upload MP4, AVI, or MOV.")
 
+    MAX_UPLOAD_MB = 50
+    CHUNK_SIZE = 1024 * 1024  # 1 MB chunks
+
     job_id = str(uuid.uuid4())[:8]
     raw_filename = f"{job_id}_raw_{file.filename}"
     processed_filename = f"{job_id}_processed.mp4"
@@ -281,12 +284,24 @@ async def analyze_video(
     raw_path = os.path.join(UPLOAD_DIR, raw_filename)
     processed_path = os.path.join(PROCESSED_DIR, processed_filename)
 
-    # Save uploaded file asynchronously
-    contents = await file.read()
-    with open(raw_path, "wb") as f:
-        f.write(contents)
+    # Stream file to disk in chunks to avoid loading entire file into RAM
+    file_size_bytes = 0
+    with open(raw_path, "wb") as out:
+        while True:
+            chunk = await file.read(CHUNK_SIZE)
+            if not chunk:
+                break
+            file_size_bytes += len(chunk)
+            if file_size_bytes > MAX_UPLOAD_MB * 1024 * 1024:
+                out.close()
+                os.remove(raw_path)
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"File too large. Maximum allowed size is {MAX_UPLOAD_MB}MB. Please trim your video to under {MAX_UPLOAD_MB}MB."
+                )
+            out.write(chunk)
 
-    file_size_mb = round(len(contents) / (1024 * 1024), 2)
+    file_size_mb = round(file_size_bytes / (1024 * 1024), 2)
 
     JOBS[job_id] = {
         "job_id": job_id,
