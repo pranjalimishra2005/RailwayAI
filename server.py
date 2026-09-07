@@ -110,6 +110,10 @@ def process_video_worker(
 
         last_logged_time = -1.0
 
+        YOLO_SKIP_FRAMES = 5  # Run YOLO every Nth frame; reuse previous detections between frames
+
+        last_detections = []
+
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -134,8 +138,11 @@ def process_video_worker(
 
             engine.update_homography(track_polygon, dst_size_m=(3.0, 30.0))
 
-            # Run AI Inference & ByteTrack Tracking
-            detections = engine.detect_and_track(frame, track_polygon, src_fps)
+            # Run AI Inference only every YOLO_SKIP_FRAMES frames for speed
+            if frame_idx % YOLO_SKIP_FRAMES == 1:
+                last_detections = engine.detect_and_track(frame, track_polygon, src_fps)
+
+            detections = last_detections
             hazards = [d for d in detections if d.is_critical or d.zone == "HAZARD"]
 
             # Render Computer Graphics Pipeline
