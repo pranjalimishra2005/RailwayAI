@@ -165,11 +165,39 @@ with st.sidebar:
 # HEADER & HERO BANNER
 # ════════════════════════════════════════════════════════════
 st.markdown("""
-<div class="hero-banner">
-    <div class="hero-title">AI-Powered Railway Safety System</div>
-    <div class="hero-subtitle">Real-Time Computer Vision & Homography Analytics Platform</div>
+<div class="hero-banner" style="text-align: center; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); border: 2px solid #38bdf8; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(56,189,248,0.1) 0%, transparent 60%); animation: spin 20s linear infinite;"></div>
+    <div class="hero-title" style="font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px #38bdf8;">RailAI Vision System</div>
+    <div class="hero-subtitle" style="font-size: 1.1rem; color: #cbd5e1; margin-bottom: 15px;">Real-Time Computer Graphics & Deep Learning Analytics Platform</div>
 </div>
+<style>
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.stButton > button[kind="primary"] {
+    background: linear-gradient(90deg, #0ea5e9, #3b82f6);
+    border: none;
+    box-shadow: 0 0 15px rgba(14, 165, 233, 0.5);
+    transition: all 0.3s ease;
+}
+.stButton > button[kind="primary"]:hover {
+    box-shadow: 0 0 25px rgba(14, 165, 233, 0.8);
+    transform: scale(1.02);
+}
+</style>
 """, unsafe_allow_html=True)
+
+col_demo1, col_demo2, col_demo3 = st.columns([1, 2, 1])
+with col_demo2:
+    if st.button("🚀 PLAY LIVE DEMO NOW", use_container_width=True, type="primary"):
+        st.session_state.running = True
+        st.session_state.active_video_source = "test_videos/demo1.mp4"
+        
+        st.session_state.engine = DetectionEngine(confidence_threshold=conf_thresh)
+        st.session_state.graphics = GraphicsEngine()
+        st.session_state.multimedia = MultimediaManager(output_dir="recordings")
+        st.session_state.event_log = []
+        st.session_state.frame_count = 0
+        st.session_state.total_hazards = 0
+        st.toast("🚀 Live Demo Initialized!", icon="✅")
 
 # Dynamic Alert Banner Container
 alert_container = st.empty()
@@ -221,8 +249,10 @@ if start_btn:
                 st.session_state.running = False
             else:
                 st.session_state.running = True
+                st.session_state.active_video_source = video_source
         else:
             st.session_state.running = True
+            st.session_state.active_video_source = video_source
 
         if st.session_state.running:
             st.session_state.engine = DetectionEngine(confidence_threshold=conf_thresh)
@@ -242,10 +272,11 @@ if st.session_state.running and st.session_state.engine is not None:
     graphics: GraphicsEngine = st.session_state.graphics
     multimedia: MultimediaManager = st.session_state.multimedia
 
-    cap = cv2.VideoCapture(video_source)
+    active_src = st.session_state.get("active_video_source", video_source)
+    cap = cv2.VideoCapture(active_src)
 
     if not cap.isOpened():
-        st.error("❌ Failed to open video stream.")
+        st.error(f"❌ Failed to open video stream: {active_src}")
         st.session_state.running = False
     else:
         prev_time = time.time()
