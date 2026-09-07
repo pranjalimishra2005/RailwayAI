@@ -1,8 +1,12 @@
-# Virtual Environment
+# Virtual Environment & Node Modules
 venv/
 .venv/
 env/
 ENV/
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
 
 # Python Cache & Bytecode
 __pycache__/
