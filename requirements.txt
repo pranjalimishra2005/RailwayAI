@@ -1,26 +1,18 @@
-# ============================================================
-# AI-Powered Railway Safety System - Dependencies
-# ============================================================
-# Install: pip install -r requirements.txt
-# ============================================================
+# Core Computer Vision & Deep Learning
+opencv-python-headless>=4.8.0
+ultralytics>=8.0.0
+numpy>=1.24.0
 
-# --- Core Computer Vision & Deep Learning ---
-opencv-python>=4.8.0              # Image processing, alpha blending, geometric rendering
-ultralytics>=8.0.0                # YOLOv8 object detection framework
-numpy>=1.24.0                     # N-dimensional array operations for frame math
+# FastAPI Backend & Web Server
+fastapi>=0.100.0
+uvicorn>=0.22.0
+python-multipart>=0.0.6
 
-# --- Interactive Dashboard ---
-streamlit>=1.28.0                 # Real-time web dashboard with widget controls
+# Video Encoding & Media Handling
+imageio>=2.30.0
+imageio-ffmpeg>=0.4.8
+Pillow>=10.0.0
 
-# --- Audio & Multimedia ---
-pyttsx3>=2.90                     # Offline text-to-speech voice alert engine
-pygame>=2.5.0                     # Synthesized warning tone generation & audio mixer
-
-# --- Data Visualization ---
-plotly>=5.18.0                    # Interactive confidence distribution charts
-
-# --- Image Handling ---
-Pillow>=10.0.0                    # Watermarked snapshot generation & image I/O
-
-# --- System Monitoring ---
-psutil>=5.9.0                     # CPU/memory usage metrics for performance panel
+# System Monitoring & Visualizations
+psutil>=5.9.0
+plotly>=5.18.0
