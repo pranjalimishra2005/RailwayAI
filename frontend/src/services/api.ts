@@ -2,7 +2,7 @@
  * API Service for RailAI Safety Intelligence Backend
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://railai-backend.onrender.com';
 
 export interface TimelineEvent {
   timestamp: number;
