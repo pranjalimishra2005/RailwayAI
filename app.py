@@ -188,16 +188,19 @@ st.markdown("""
 col_demo1, col_demo2, col_demo3 = st.columns([1, 2, 1])
 with col_demo2:
     if st.button("🚀 PLAY LIVE DEMO NOW", use_container_width=True, type="primary"):
-        st.session_state.running = True
-        st.session_state.active_video_source = "test_videos/demo1.mp4"
-        
-        st.session_state.engine = DetectionEngine(confidence_threshold=conf_thresh)
-        st.session_state.graphics = GraphicsEngine()
-        st.session_state.multimedia = MultimediaManager(output_dir="recordings")
-        st.session_state.event_log = []
-        st.session_state.frame_count = 0
-        st.session_state.total_hazards = 0
-        st.toast("🚀 Live Demo Initialized!", icon="✅")
+        _demo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_videos", "demo1.mp4")
+        if not os.path.exists(_demo_path):
+            st.error(f"Demo video not found at: {_demo_path}")
+        else:
+            st.session_state.running = True
+            st.session_state.active_video_source = _demo_path
+            st.session_state.engine = DetectionEngine(confidence_threshold=conf_thresh)
+            st.session_state.graphics = GraphicsEngine()
+            st.session_state.multimedia = MultimediaManager(output_dir="recordings")
+            st.session_state.event_log = []
+            st.session_state.frame_count = 0
+            st.session_state.total_hazards = 0
+            st.toast("🚀 Live Demo Initialized!", icon="✅")
 
 # Dynamic Alert Banner Container
 alert_container = st.empty()
