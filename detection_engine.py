@@ -100,6 +100,10 @@ class Detection:
         self.is_critical = False          # High priority danger trigger
 
     @property
+    def distance_est(self):
+        return self.distance_m
+
+    @property
     def priority(self):
         return HAZARD_PRIORITY.get(self.hazard_type, 5)
 

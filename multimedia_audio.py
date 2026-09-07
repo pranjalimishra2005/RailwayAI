@@ -375,7 +375,7 @@ class MultimediaManager:
             if cat_key not in alerted_categories:
                 self.audio.trigger_alert(
                     det.hazard_type, det.zone,
-                    det.class_name, det.distance_est,
+                    det.class_name, det.distance_m,
                 )
                 alerted_categories.add(cat_key)
 
