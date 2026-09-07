@@ -2,7 +2,10 @@
  * API Service for RailAI Safety Intelligence Backend
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://railai-backend-gtyw.onrender.com';
+// Use relative URLs so all requests go through Vercel's proxy rewrites (/api/* → Render backend)
+// This avoids CORS issues entirely since requests appear same-origin to the browser.
+// For local dev, NEXT_PUBLIC_API_URL can be set to the local FastAPI server.
+const API_BASE_URL = (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_API_URL) ? '' : (process.env.NEXT_PUBLIC_API_URL || '');
 
 export interface TimelineEvent {
   timestamp: number;
