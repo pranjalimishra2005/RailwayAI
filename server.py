@@ -199,6 +199,16 @@ def process_video_worker(
         writer.release()
         multimedia.shutdown()
 
+        # Free YOLO and OpenCV memory BEFORE spawning ffmpeg to prevent Render OOM crash
+        import gc
+        try:
+            del engine
+            del frame
+            del rendered
+        except:
+            pass
+        gc.collect()
+
         # Re-encode to HTML5 web-compatible H.264 (yuv420p)
         try:
             import subprocess
@@ -210,6 +220,7 @@ def process_video_worker(
                 "-c:v", "libx264",
                 "-pix_fmt", "yuv420p",
                 "-preset", "ultrafast",
+                "-threads", "1",  # Crucial for low-RAM Render environments
                 output_path
             ]
             subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
