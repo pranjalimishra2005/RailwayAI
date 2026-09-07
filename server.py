@@ -91,9 +91,11 @@ def process_video_worker(
         w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        # Use mp4v codec for standard browser compatibility
+        raw_temp_output = output_path.replace(".mp4", "_temp.mp4")
+
+        # Use mp4v codec for fast raw frame rendering
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        writer = cv2.VideoWriter(output_path, fourcc, src_fps, (w, h))
+        writer = cv2.VideoWriter(raw_temp_output, fourcc, src_fps, (w, h))
 
         engine = DetectionEngine(confidence_threshold=conf_thresh)
         graphics = GraphicsEngine(width=w, height=h)
@@ -189,6 +191,29 @@ def process_video_worker(
         cap.release()
         writer.release()
         multimedia.shutdown()
+
+        # Re-encode to HTML5 web-compatible H.264 (yuv420p)
+        try:
+            import subprocess
+            import imageio_ffmpeg
+            ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+            cmd = [
+                ffmpeg_exe, "-y",
+                "-i", raw_temp_output,
+                "-c:v", "libx264",
+                "-pix_fmt", "yuv420p",
+                "-preset", "ultrafast",
+                output_path
+            ]
+            subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            if os.path.exists(raw_temp_output):
+                os.remove(raw_temp_output)
+        except Exception as ffmpeg_err:
+            print("FFmpeg re-encode fallback:", ffmpeg_err)
+            if os.path.exists(raw_temp_output):
+                if os.path.exists(output_path):
+                    os.remove(output_path)
+                os.rename(raw_temp_output, output_path)
 
         # Determine Risk Level
         risk_level = "LOW"
