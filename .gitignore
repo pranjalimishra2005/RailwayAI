@@ -1,0 +1,30 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyTorch / YOLO Model Weights
+*.pt
+*.onnx
+
+# System & Media Recordings
+recordings/
+test_videos/
+*.avi
+*.mp4
+*.png
+
+# Streamlit Local Config / Cache
+.streamlit/secrets.toml
+
+# IDE & System Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
